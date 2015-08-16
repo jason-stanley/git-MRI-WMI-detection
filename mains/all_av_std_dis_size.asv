@@ -1,0 +1,72 @@
+% For each true detection and false detection, compute:
+% 1) the average brightness of the region and its standard deviation
+% 2) also compute the same for its 10 pixel boundary neighborhood
+
+
+% Results on folder 2,3 and 4 are seperated.
+
+% Pengwei Wu, guided by Irene Cheng
+clear; close all; clc; tic
+
+path(path, '../toolbox');
+path(path, '../functions');
+path(path, '../misc');
+
+booDebug = 1; booResult = 1; 
+booAll = 0;
+
+numImageF2 = 12;
+numImageF3 = 8;
+numImageF4 = 10;
+if(booAll)
+    rangeF2 = 1:1:12;
+else
+    rangeF2 = 2;
+end
+
+Data - [];
+
+for loopImage = rangeF2
+    
+    pathImageDec = ['../data/Folder-2/secondBC0147-3-', num2str(loopImage), '-4.png'];
+    pathImageRef = ['../data/Folder-2/secondBC0147-3-', num2str(loopImage), '-1.png'];
+    imgDec = imread(pathImageDec);
+    imgRef = imread(pathImageRef);       
+    
+    dimSave1 = max(size(imgDec, 1), size(imgRef, 1));
+    dimSave2 = max(size(imgDec, 2), size(imgRef, 2));
+    
+    imgDec = padarray(imgDec, [dimSave1 - size(imgDec,1) dimSave2 - size(imgDec, 2)], 255, 'post');
+    imgRef = padarray(imgRef, [dimSave1 - size(imgRef,1) dimSave2 - size(imgRef, 2)], 0, 'post');
+        
+    imgDecGray = rgb2gray(imgDec);
+    imgRefGray = rgb2gray(imgRef);
+    
+    maskDec = (imgDec(:,:,1) == 255) & (~(imgDec(:,:,1) == 255 & ...
+        imgDec(:,:,2) == 255 & imgDec(:,:,3) == 255));
+    maskRef = (imgRef(:,:,1) >= 150) & (~(imgRef(:,:,1) >= 150 & ...
+        imgRef(:,:,2) >= 150 & imgRef(:,:,3) >= 150));
+    
+    maskSup = ones(size(maskRef)); maskSup(1:50, :) = 0; maskRef = maskRef & logical(maskSup);
+    if(booDebug); mysubplot([], imgDecGray, imgRefGray, maskDec, maskRef); maxscreen(); end
+    
+    labelDec = bwlabel(maskDec, 8);
+    labelRef = bwlabel(maskRef, 8);
+    if(booDebug); mysubplot([], labelDec, labelRef); maxscreen(); end
+    
+    % Okay, then we know the exact number of the connected components. 
+    
+    numConnect = max(labelDec(:));
+    
+    for loopConnect = 1:1:numConnect
+        maskSingleDec = labelDec == loopConnect;
+        maskSingleRef = labelRef == loopConnect;
+        Data
+
+    sizeDec = regionprops(bwlabeln(maskDec, 8), 'Area');
+    sizeRef = regionprops(bwlabeln(maskRef, 8), 'Area');
+    
+end
+
+
+toc
